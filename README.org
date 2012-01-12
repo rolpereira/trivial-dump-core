@@ -1,4 +1,4 @@
-trivial-dump-core is a small wrapper that provides a common interface
+trivial-dump-core is a small, MIT-licensed, wrapper that provides a common interface
 between lisp implementations for the creation of lisp cores and
 executables.
 
