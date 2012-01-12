@@ -2,11 +2,7 @@ trivial-dump-core is a small wrapper that provides a common interface
 between lisp implementations for the creation of lisp cores and
 executables.
 
-Currently it supports three lisp implementations:
-
-  * SBCL
-  * Clozure CL
-  * CLISP
+Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
 
 * Installation using quicklisp
 
@@ -241,8 +237,7 @@ Currently it supports three lisp implementations:
    * (trivial-dump-core:save-executable
         "sbcl-hello-world-repl"
         #'(lambda ()
-            (format t "Hello, World!~%"))
-        :exit-repl nil)
+            (format t "Hello, World!~%")) :exit-repl nil)
    [undoing binding stack and other enclosing state... done]
    [saving current Lisp image into sbcl-hello-world-repl:
    writing 3512 bytes from the read-only space at 0x01000000
