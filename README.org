@@ -3,6 +3,7 @@ between lisp implementations for the creation of lisp cores and
 executables.
 
 Currently it supports three lisp implementations:
+
   * SBCL
   * Clozure CL
   * CLISP
@@ -10,9 +11,9 @@ Currently it supports three lisp implementations:
 * Installation using quicklisp
 
   Hopefully this library will be added to [[http://www.quicklisp.org/beta/][quicklisp]]. When that
-  happens, you can install trivial-dump-core the following steps:
+  happens, you can install trivial-dump-core with the following steps:
 
-  First, install [[http://www.quicklisp.org/beta/#installation][quicklisp]]. Then, open your lisp interpreter and type
+  First, install [[http://www.quicklisp.org/beta/#installation][quicklisp]]. Then, open your lisp interpreter and type:
 
 #+BEGIN_SRC lisp
   (ql:quickload 'trivial-dump-core)
@@ -59,9 +60,9 @@ Currently it supports three lisp implementations:
    Let's open up, for example, Clozure CL:
 
 #+BEGIN_SRC
-rolando@rolando-desktop:~$ ccl
-Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
-? 
+   rolando@rolando-desktop:~$ ccl
+   Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
+   ? 
 #+END_SRC
    
    Now we load trivial-dump-core (we assume you have quicklisp
@@ -99,10 +100,10 @@ Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
 #+END_SRC
 
    You'll notice that we're back in the command-line. This behaviour
-   is implementation-dependent, for example, in CLISP you stay in the
+   is implementation-dependent. For example, in CLISP you stay in the
    REPL even after creating an image.
 
-   Also notice the command =ccl -I my-core.ccl=. That's the command
+   Also notice the command =ccl -I my-core.ccl= appeared. That's the command
    you have to type in the command-line to make ccl open the image you
    just created. Even though the specific flags you need to use change
    from implementation to implementation, trivial-dump-core will
@@ -117,7 +118,7 @@ Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
 #+END_SRC
 
    So far, everything is the same as usual right? However, before
-   creating this image, we had defined a new function called
+   creating this image, we defined a new function called
    =hello-world=. This function should still exist, even though we
    closed the lisp interpreter.
 
@@ -237,9 +238,11 @@ Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
    ; Loading "trivial-dump-core"
    
    (TRIVIAL-DUMP-CORE)
-   * (trivial-dump-core:save-executable "sbcl-hello-world-repl" #'(lambda ()
-                                                                    (format t "Hello, World!~%"))
-       :exit-repl nil)
+   * (trivial-dump-core:save-executable
+        "sbcl-hello-world-repl"
+        #'(lambda ()
+            (format t "Hello, World!~%"))
+        :exit-repl nil)
    [undoing binding stack and other enclosing state... done]
    [saving current Lisp image into sbcl-hello-world-repl:
    writing 3512 bytes from the read-only space at 0x01000000
