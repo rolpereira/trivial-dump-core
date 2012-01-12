@@ -250,7 +250,8 @@ Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
 #+END_SRC
 
    Notice that when we run the file =sbcl-hello-world-repl= we get a
-   lisp prompt when the top-level function returns.
+   lisp prompt when the top-level function returns (this functionality
+   is currently unavailable in Clozure CL).
 
 #+BEGIN_SRC
    rolando@rolando-desktop:~$ ./sbcl-hello-world-repl 
