@@ -1,0 +1,370 @@
+trivial-dump-core is a small wrapper that provides a common interface
+between lisp implementations for the creation of lisp cores and
+executables.
+
+Currently it supports three lisp implementations:
+  * SBCL
+  * Clozure CL
+  * CLISP
+
+* Installation using quicklisp
+
+  Hopefully this library will be added to [[http://www.quicklisp.org/beta/][quicklisp]]. When that
+  happens, you can install trivial-dump-core the following steps:
+
+  First, install [[http://www.quicklisp.org/beta/#installation][quicklisp]]. Then, open your lisp interpreter and type
+
+#+BEGIN_SRC lisp
+  (ql:quickload 'trivial-dump-core)
+#+END_SRC
+
+  This should download and install trivial-dump-core. This download is
+  only done once, after that quicklisp will always load your local
+  copy of trivial-dump-core, unless there was some change in the code.
+
+* Library functions
+
+  There are two main functions in trivial-dump-core:
+  * dump-image
+  * save-executable
+
+** dump-image
+
+   The =dump-image= function is used to freeze the state of your lisp
+   interpreter and store it in a file. You can then, at a later time,
+   load that state back into your lisp interpreter.
+                                                             
+   The =dump-image= function only takes one argument, and that is the
+   name of the file to use as storage for the lisp image.
+
+** save-executable
+
+   The =save-executable= function is used to create an executable file
+   that you can later use in a computer without your lisp
+   implementation installed.
+
+   The =save-executable= function takes 3 arguments:
+   * =filename= - The name of the file to create
+   * =init-function= - The name of the top-level function. This is the
+     entry point to your executable
+   * =exit-repl= - Indicates what should happen after the function
+     specified in =init-function= returns. If non-NIL, you enter the
+     regular REPL, otherwise the executable ends and you return to the
+     command-line.
+
+* Examples
+
+** dump-image
+   
+   Let's open up, for example, Clozure CL:
+
+#+BEGIN_SRC
+rolando@rolando-desktop:~$ ccl
+Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
+? 
+#+END_SRC
+   
+   Now we load trivial-dump-core (we assume you have quicklisp
+   installed already).
+
+#+BEGIN_SRC
+   ? (ql:quickload 'trivial-dump-core)
+   To load "trivial-dump-core":
+     Load 1 ASDF system:
+       trivial-dump-core
+   ; Loading "trivial-dump-core"
+   [package trivial-dump-core]
+   (TRIVIAL-DUMP-CORE)
+   ?
+#+END_SRC
+
+   Let's define a new function:
+
+#+BEGIN_SRC lisp
+   ? (defun hello-world ()
+       (format t "Hello, World!"))
+   HELLO-WORLD
+   ?
+#+END_SRC
+
+   So now this lisp interpreter has a function called
+   =hello-world=. Let's save dump the interpreter state to a file
+   called "my-core.ccl":
+
+#+BEGIN_SRC
+   ? (trivial-dump-core:dump-image "my-core.ccl")
+   To run the image, use the following command in the terminal:
+   ccl -I my-core.ccl
+   rolando@rolando-desktop:~$
+#+END_SRC
+
+   You'll notice that we're back in the command-line. This behaviour
+   is implementation-dependent, for example, in CLISP you stay in the
+   REPL even after creating an image.
+
+   Also notice the command =ccl -I my-core.ccl=. That's the command
+   you have to type in the command-line to make ccl open the image you
+   just created. Even though the specific flags you need to use change
+   from implementation to implementation, trivial-dump-core will
+   always show you the command you need to use to open back the image.
+
+   So let's open it.
+
+#+BEGIN_SRC
+   rolando@rolando-desktop:~$ ccl -I my-core.ccl 
+   Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
+   ? 
+#+END_SRC
+
+   So far, everything is the same as usual right? However, before
+   creating this image, we had defined a new function called
+   =hello-world=. This function should still exist, even though we
+   closed the lisp interpreter.
+
+#+BEGIN_SRC lisp
+   ? (hello-world)
+   Hello, World!
+   NIL
+   ? 
+#+END_SRC
+
+   As you can see, the function still exists.
+
+   Currently, you can use the =dump-image= function in SBCL, CLISP and
+   Clozure CL.
+
+   Keep in mind that you can't open an image using a implementation
+   that's different from the one that created it, ie. you can't create
+   an image in SBCL and then open it in CLISP.
+
+** save-executable
+   This time, let's open up SBCL.
+
+#+BEGIN_SRC
+   rolando@rolando-desktop:~$ sbcl
+   This is SBCL 1.0.55, an implementation of ANSI Common Lisp.
+   More information about SBCL is available at <http://www.sbcl.org/>.
+   
+   SBCL is free software, provided as is, with absolutely no warranty.
+   It is mostly in the public domain; some portions are provided under
+   BSD-style licenses.  See the CREDITS and COPYING files in the
+   distribution for more information.
+   * 
+#+END_SRC
+
+   As before, we'll need to load trivial-dump-core using quicklisp.
+
+#+BEGIN_SRC
+   * (ql:quickload 'trivial-dump-core)
+   To load "trivial-dump-core":
+     Load 1 ASDF system:
+       trivial-dump-core
+   ; Loading "trivial-dump-core"
+   [package trivial-dump-core]
+   (TRIVIAL-DUMP-CORE)
+   * 
+#+END_SRC
+
+   Let's define a new function.
+
+#+BEGIN_SRC
+   * (defun hello-world ()
+       (format t "Hello, World!~%"))
+   
+   HELLO-WORLD
+   * 
+#+END_SRC
+
+   Finally, we create an executable with the name "sbcl-hello-world"
+   using the =save-executable= function, using the =hello-world= has
+   the entry point.
+
+#+BEGIN_SRC
+   * (trivial-dump-core:save-executable "sbcl-hello-world" #'hello-world)
+   [undoing binding stack and other enclosing state... done]
+   [saving current Lisp image into sbcl-hello-world:
+   writing 3512 bytes from the read-only space at 0x01000000
+   writing 2224 bytes from the static space at 0x01100000
+   writing 32231424 bytes from the dynamic space at 0x09000000
+   done]
+   rolando@rolando-desktop:~$
+#+END_SRC
+
+   As it already happened with Clozure CL during the =dump-image=
+   example, what happens after you call =save-executable= is
+   implementation-dependent. In this case, the lisp interpreter closed
+   and we are back in the command-line.
+
+   However, there's now a new executable file in the folder. Let's run
+   it.
+
+#+BEGIN_SRC
+   rolando@rolando-desktop:~$ ./sbcl-hello-world 
+   Hello, World!
+   rolando@rolando-desktop:~$
+#+END_SRC
+
+   So the program called our =hello-world= function, and after it
+   returned, the lisp process ended.
+
+   But what if we wanted to open a REPL after the return of top-level
+   function, so we could inspect the state of some variables?
+
+   In that case you need to set the key =exit-repl= NIL.
+
+   By default, =exit-repl= is T. In that case we get the behaviour
+   shown before, ie. after the execution of the top-level function,
+   the lisp process closes and we return to the command-line. However,
+   if =exit-repl= is NIL, then after the execution of the top-level
+   function we return to the regular REPL.
+
+   (Also notice the use of =lambda= in the following example do define
+   the top-level function).
+
+#+BEGIN_SRC   
+   rolando@rolando-desktop:~$ sbcl
+   This is SBCL 1.0.55, an implementation of ANSI Common Lisp.
+   More information about SBCL is available at <http://www.sbcl.org/>.
+   
+   SBCL is free software, provided as is, with absolutely no warranty.
+   It is mostly in the public domain; some portions are provided under
+   BSD-style licenses.  See the CREDITS and COPYING files in the
+   distribution for more information.
+   * (ql:quickload 'trivial-dump-core)
+   To load "trivial-dump-core":
+     Load 1 ASDF system:
+       trivial-dump-core
+   ; Loading "trivial-dump-core"
+   
+   (TRIVIAL-DUMP-CORE)
+   * (trivial-dump-core:save-executable "sbcl-hello-world-repl" #'(lambda ()
+                                                                    (format t "Hello, World!~%"))
+       :exit-repl nil)
+   [undoing binding stack and other enclosing state... done]
+   [saving current Lisp image into sbcl-hello-world-repl:
+   writing 3512 bytes from the read-only space at 0x01000000
+   writing 2224 bytes from the static space at 0x01100000
+   writing 32231424 bytes from the dynamic space at 0x09000000
+   done]
+   rolando@rolando-desktop:~$
+#+END_SRC
+
+   Notice that when we run the file =sbcl-hello-world-repl= we get a
+   lisp prompt when the top-level function returns.
+
+#+BEGIN_SRC
+   rolando@rolando-desktop:~$ ./sbcl-hello-world-repl 
+   Hello, World!
+   * (+ 1 1)
+   
+   2
+   * 
+#+END_SRC
+
+* SBCL and Slime
+
+  There a problem with saving core images in SBCL when it's running
+  more than one thread, as is the case with the SBCL+Slime
+  combination.
+
+  So to use trivial-dump-core with SBCL running with a Slime prompt,
+  the process is a little different.
+
+  You call the functions =dump-image= and =save-executable= as usual,
+  but those functions instead of working the normal way, they print
+  out a sexp that you need to evaluate in the =*inferior-lisp*= buffer.
+
+** Example
+
+   Inside emacs press =C-u M-x slime RET sbcl RET=.
+
+   When the prompt opens, load trivial-dump-core as normal.
+
+#+BEGIN_SRC   
+   CL-USER> (ql:quickload 'trivial-dump-core)
+   To load "trivial-dump-core":
+     Load 1 ASDF system:
+       trivial-dump-core
+   ; Loading "trivial-dump-core"
+   
+   (TRIVIAL-DUMP-CORE)
+   CL-USER> 
+#+END_SRC
+
+   Let's create a new image using =dump-image=.
+
+#+BEGIN_SRC
+   CL-USER> (trivial-dump-core:dump-image "sbcl-slime")
+   Cannot dump an sbcl image from inside Slime.
+   
+   Please go to the *inferior-lisp* buffer in emacs and run the following code:
+   
+   (trivial-dump-core::sbcl-dump-image-slime "sbcl-slime")
+   NIL
+   CL-USER>
+#+END_SRC
+
+   Notice the sexp in the message. Copy it into emacs' kill-ring and
+   open the =*inferior-lisp*= buffer using =C-x b *inferior-lisp* RET=
+   and paste the sexp there.
+
+#+BEGIN_SRC
+   * (trivial-dump-core::sbcl-dump-image-slime "sbcl-slime")
+   ;; swank:close-connection: NIL
+   To run the image, use the following command in the terminal:
+   sbcl --core sbcl-slime
+   [undoing binding stack and other enclosing state... done]
+   [saving current Lisp image into sbcl-slime:
+   writing 3512 bytes from the read-only space at 0x01000000
+   writing 2224 bytes from the static space at 0x01100000
+   writing 35590144 bytes from the dynamic space at 0x09000000
+   done]
+   
+   Process inferior-lisp finished
+#+END_SRC
+
+   The end result is a core file similar to one created in the
+   command-line.
+
+   The same think happens when you try to use =save-executable= with
+   SBCL in Slime.
+
+#+BEGIN_SRC
+   CL-USER> (ql:quickload 'trivial-dump-core)
+   To load "trivial-dump-core":
+     Load 1 ASDF system:
+       trivial-dump-core
+   ; Loading "trivial-dump-core"
+   
+   (TRIVIAL-DUMP-CORE)
+   CL-USER> (trivial-dump-core:save-executable "sbcl-exec-slime" #'(lambda () (format t "Hello, World!")))
+   Cannot run save an sbcl image from inside Slime.
+   
+   Please go to the *inferior-lisp* buffer in emacs and run the following code:
+   
+   (trivial-dump-core::sbcl-save-slime-and-die "sbcl-exec-slime" #'(LAMBDA ()
+                                                                     (FORMAT
+                                                                      T
+                                                                      "Hello, World!")))
+   NIL
+   CL-USER>
+#+END_SRC
+
+   Copy and paste the form into the =*inferior-lisp*= buffer to create
+   an executable.
+
+#+BEGIN_SRC
+   * (trivial-dump-core::sbcl-save-slime-and-die "sbcl-exec-slime" #'(LAMBDA ()
+                                                                     (FORMAT
+                                                                      T
+                                                                      "Hello, World!")))
+   ;; swank:close-connection: NIL
+   [undoing binding stack and other enclosing state... done]
+   [saving current Lisp image into sbcl-exec-slime:
+   writing 3512 bytes from the read-only space at 0x01000000
+   writing 2224 bytes from the static space at 0x01100000
+   writing 35340288 bytes from the dynamic space at 0x09000000
+   done]
+   
+   Process inferior-lisp finished
+#+END_SRC
