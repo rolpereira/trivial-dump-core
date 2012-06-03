@@ -9,7 +9,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
   This library is part of [[http://www.quicklisp.org/beta/][quicklisp]]. To install trivial-dump-core use
   the following steps:
 
-  First, install [[http://www.quicklisp.org/beta/#installation][quicklisp]]. Then, open your lisp interpreter and type:
+  First, [[http://www.quicklisp.org/beta/#installation][install quicklisp]]. Then, open your lisp interpreter and type:
 
 #+BEGIN_SRC lisp
   (ql:quickload 'trivial-dump-core)
