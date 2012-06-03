@@ -208,7 +208,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    But what if we wanted to open a REPL after the return of top-level
    function, so we could inspect the state of some variables?
 
-   In that case you need to set the key =exit-repl= NIL.
+   In that case you need to set the key =exit-repl= to NIL.
 
    By default, =exit-repl= is T. In that case we get the behaviour
    shown before, ie. after the execution of the top-level function,
