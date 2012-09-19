@@ -19,6 +19,7 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
   There are two main functions in trivial-dump-core:
 
   * dump-image
+
   * save-executable
 
 ** dump-image
@@ -41,6 +42,7 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
    The =save-executable= function takes 3 arguments:
 
    * =filename= - Path of the executable file
+
    * =init-function= - Zero-argument function object that acts as the
      entry point to your executable (the equivalent of main() in C).
 
