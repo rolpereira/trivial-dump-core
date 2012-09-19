@@ -43,10 +43,6 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
    * =filename= - Path of the executable file
    * =init-function= - Zero-argument function object that acts as the
      entry point to your executable (the equivalent of main() in C).
-   * =exit-repl= - [keyword, default T] If non-NIL, the Lisp image
-     exits after =init-function= has returned. If NIL, the REPL is
-     entered. Some Lisp implementations ignore this option and always
-     exit.
 
 * Examples
 
