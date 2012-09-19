@@ -29,8 +29,7 @@
 ;;; Main functions
 
 (defun dump-image (filename)
-  "Dump the current state of the lisp image into a file so that it can
-be resumed in a later date."
+  "Dump the current state of the Lisp process to an image file."
   #+clisp (progn
             (format t "To run the image, use the following command in the terminal:
 clisp -M ~A~%"
@@ -54,25 +53,19 @@ Please consult its documentation to see how you can dump the lisp image."
                               (lisp-implementation-type))
   )
 
-(defmacro save-executable (filename init-function &key (exit-repl t))
-  "Dump the current lisp image into an executable.
+(defmacro save-executable (filename init-function &key &allow-other-keys)
+  "Make a stand-alone executable file from the current Lisp process.
 
-FILENAME is a string representing the filename the image will have on the disk.
+FILENAME: Path of the executable file
 
-INIT-FUNCTION indicates the top-level function for the executable. It
-needs to use the #' reader macro, ie. #'hello-world
-and #'(lambda () (format t \"Hello, World!\") are fine, but
-'hello-world is not.
+INIT-FUNCTION: Zero-argument function object that acts as the entry
+point to your executable (the equivalent of main() in C).
 
-The key EXIT-REPL if non-NIL indicates that the normal lisp REPL
-should be started after running INIT-FUNCTION. Not every lisp implementation supports this keyword.
-
-Pay attention to the fact that after running this
-function (save-executable), some implementations (ie. sbcl and
-clozure) quit the REPL."
-  #+clisp `(%save-executable-clisp ,filename ,init-function ,exit-repl)
-  #+sbcl `(%save-executable-sbcl ,filename ,init-function ,exit-repl)
-  #+clozure `(%save-executable-clozure ,filename ,init-function ,exit-repl)
+Some implementations (Clozure, SBCL) will quit after this function is
+called."
+  #+clisp `(%save-executable-clisp ,filename ,init-function)
+  #+sbcl `(%save-executable-sbcl ,filename ,init-function)
+  #+clozure `(%save-executable-clozure ,filename ,init-function)
   #-(or clisp sbcl clozure) `(error "The lisp implementation \"~A\" isn't supported.
 
 Please consult its documentation to see how you can create a executable."
@@ -93,42 +86,21 @@ Please go to the *inferior-lisp* buffer in emacs and run the following code:
 \(trivial-dump-core::sbcl-dump-image-slime \"~A\")"
      filename))
 
-#+clisp 
-(defun %save-executable-clisp (filename init-function exit-repl)
-  (if exit-repl
-    (ext:saveinitmem filename
-      :init-function (lambda ()
-                       (funcall init-function)
-                       (ext:exit))
-      :executable t)
-    (ext:saveinitmem filename
-      :init-function init-function
-      :executable t)))
+#+clisp
+(defun %save-executable-clisp (filename init-function)
+  (ext:saveinitmem filename
+                   :init-function (lambda ()
+                                    (funcall init-function)
+                                    (ext:exit))
+                   :executable t))
 
 #+clozure
-(defun %save-executable-clozure (filename init-function exit-repl)
-  (if exit-repl
-    (ccl:save-application filename
-      :toplevel-function init-function
-      :prepend-kernel t)
-    (error "Option :EXIT-REPL with nil value not supported in Clozure CL."))
+(defun %save-executable-clozure (filename init-function)
+  (ccl:save-application filename
+                        :toplevel-function init-function
+                        :prepend-kernel t))
 
-  ;; (ccl:save-application ,filename
-  ;;   :toplevel-function (lambda ()
-  ;;                        (funcall ,init-function)
-  ;;                        (defparameter *application*
-  ;;                          (make-instance 'lisp-development-system))
-  ;;                        (toplevel-function *application*
-  ;;                          (application-init-file *application*)))
-  ;;                        ;; (setq toplevel-function 
-  ;;                        ;;   #'(lambda ()
-  ;;                        ;;       (toplevel-function *application*
-  ;;                        ;;         (application-init-file *application*)))))
-  ;;   :prepend-kernel t))
-
-  )
-
-(defmacro print-save-slime-and-die-help (filename init-function exit-repl)
+(defmacro print-save-slime-and-die-help (filename init-function)
   "Print on the screen the command the user needs to run on the
 *inferior-lisp* buffer to save this image. This macro is only called
 when trying to save a sbcl lisp image inside slime."
@@ -136,26 +108,18 @@ when trying to save a sbcl lisp image inside slime."
 
 Please go to the *inferior-lisp* buffer in emacs and run the following code:
 
-\(trivial-dump-core::sbcl-save-slime-and-die \"~A\" ~S~:[ :exit-repl nil~;~])"
-     (quote ,filename) ,init-function (quote ,exit-repl)))
+\(trivial-dump-core::sbcl-save-slime-and-die \"~A\" ~S)"
+     (quote ,filename) ,init-function))
 
 #+sbcl
-(defmacro %save-executable-sbcl (filename init-function exit-repl)
+(defmacro %save-executable-sbcl (filename init-function)
   `(if (is-slime-running)
      (print-save-slime-and-die-help
        ,filename
-       (quote ,init-function)
-       ,exit-repl)
-     (if ,exit-repl
-       (sb-ext:save-lisp-and-die ,filename
-         :toplevel ,init-function
-         :executable t)
-       (sb-ext:save-lisp-and-die ,filename
-         :toplevel (lambda ()
-                     (funcall ,init-function)
-                     ;; Start the regular sbcl repl
-                     (sb-impl::toplevel-init))
-         :executable t))))
+       (quote ,init-function))
+     (sb-ext:save-lisp-and-die ,filename
+                               :toplevel ,init-function
+                               :executable t)))
 
 (defun is-slime-running ()
   "Return T if slime is running in the lisp image, otherwise return NIL."
@@ -183,9 +147,8 @@ Please go to the *inferior-lisp* buffer in emacs and run the following code:
 
 ;; Based on:
 ;; http://badbyteblues.blogspot.com/2007/06/save-slime-and-die.html
-#+sb-thread 
-(defun sbcl-save-slime-and-die (filename init-function
-                                 &key (exit-repl t))
+#+sb-thread
+(defun sbcl-save-slime-and-die (filename init-function)
   "Save a sbcl image, even when running from inside Slime.
 
 This function should only be used in the *inferior-buffer* buffer,
@@ -200,16 +163,9 @@ inside emacs."
                     (funcall (string-to-symbol "#'swank::all-threads"))))
     (funcall (string-to-symbol "#'swank::kill-thread") thread))
   (sleep 1)
-  (if exit-repl
-    (sb-ext:save-lisp-and-die filename
-      :toplevel init-function
-      :executable t)
-    (sb-ext:save-lisp-and-die filename
-      :toplevel (lambda ()
-                  (funcall init-function)
-                  ;; Start the regular sbcl repl
-                  (sb-impl::toplevel-init))
-      :executable t)))
+  (sb-ext:save-lisp-and-die filename
+                            :toplevel init-function
+                            :executable t))
 
 ;; Based on:
 ;; http://badbyteblues.blogspot.com/2007/06/save-slime-and-die.html
