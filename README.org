@@ -1,72 +1,68 @@
-trivial-dump-core is a small, MIT-licensed, wrapper that provides a common interface
-between lisp implementations for the creation of lisp cores and
-executables.
+trivial-dump-core is an MIT-licensed wrapper that provides a common
+interface between lisp implementations for the creation of lisp image
+files and executables.
 
-Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
+Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
 
-* Installation using quicklisp
+* Installation
 
-  This library is part of [[http://www.quicklisp.org/beta/][quicklisp]]. To install trivial-dump-core use
-  the following steps:
-
-  First, [[http://www.quicklisp.org/beta/#installation][install quicklisp]]. Then, open your lisp interpreter and type:
+  trivial-dump-core is available via [[http://www.quicklisp.org/beta/][quicklisp]]:
 
 #+BEGIN_SRC lisp
-  (ql:quickload 'trivial-dump-core)
+  (ql:quickload "trivial-dump-core")
 #+END_SRC
 
-  This should download and install trivial-dump-core. This download is
-  only done once, after that quicklisp will always load your local
-  copy of trivial-dump-core, unless there was some change in the code.
+  The source repository is at https://github.com/rolando2424/trivial-dump-core
 
 * Library functions
 
   There are two main functions in trivial-dump-core:
 
   * dump-image
+
   * save-executable
 
 ** dump-image
 
-   The =dump-image= function is used to freeze the state of your lisp
-   interpreter and store it in a file. You can then, at a later time,
-   load that state back into your lisp interpreter.
-                                                             
-   The =dump-image= function only takes one argument, and that is the
-   name of the file to use as storage for the lisp image.
+   The =dump-image= function is used to freeze the state of your Lisp
+   session and store it in an "image file." You can then, at a later
+   time, load that image file back into your Lisp implementation.
+
+   The =dump-image= function takes the path of the image file as its
+   only argument.
 
 ** save-executable
 
-   The =save-executable= function is used to create an executable file
-   that you can later use in a computer without your lisp
-   implementation installed.
+   The =save-executable= function creates an executable file that
+   includes the Lisp image (you can distribute it as-is without
+   needing to install the Lisp implementation on the target
+   machine). Some implementations (Clozure, SBCL) will exit after this
+   function is called.
 
    The =save-executable= function takes 3 arguments:
-   * =filename= - The name of the file to create
-   * =init-function= - The name of the top-level function. This is the
-     entry point to your executable
-   * =exit-repl= - Indicates what should happen after the function
-     specified in =init-function= returns. If non-NIL, you enter the
-     regular REPL, otherwise the executable ends and you return to the
-     command-line.
+
+   * =filename= - Path of the executable file
+
+   * =init-function= - Zero-argument function object that acts as the
+     entry point to your executable (the equivalent of main() in C).
 
 * Examples
 
 ** dump-image
-   
+
    Let's open up, for example, Clozure CL:
 
 #+BEGIN_SRC
    rolando@rolando-desktop:~$ ccl
    Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
-   ? 
+   ?
 #+END_SRC
-   
+
    Now we load trivial-dump-core (we assume you have quicklisp
    installed already).
 
 #+BEGIN_SRC
-   ? (ql:quickload 'trivial-dump-core)
+   ? (ql:quickload "trivial-dump-core")
    To load "trivial-dump-core":
      Load 1 ASDF system:
        trivial-dump-core
@@ -109,9 +105,9 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    So let's open it.
 
 #+BEGIN_SRC
-   rolando@rolando-desktop:~$ ccl -I my-core.ccl 
+   rolando@rolando-desktop:~$ ccl -I my-core.ccl
    Welcome to Clozure Common Lisp Version 1.7-r14925M  (LinuxX8632)!
-   ? 
+   ?
 #+END_SRC
 
    So far, everything is the same as usual right? However, before
@@ -123,7 +119,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    ? (hello-world)
    Hello, World!
    NIL
-   ? 
+   ?
 #+END_SRC
 
    As you can see, the function still exists.
@@ -142,12 +138,12 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    rolando@rolando-desktop:~$ sbcl
    This is SBCL 1.0.55, an implementation of ANSI Common Lisp.
    More information about SBCL is available at <http://www.sbcl.org/>.
-   
+
    SBCL is free software, provided as is, with absolutely no warranty.
    It is mostly in the public domain; some portions are provided under
    BSD-style licenses.  See the CREDITS and COPYING files in the
    distribution for more information.
-   * 
+   *
 #+END_SRC
 
    As before, we'll need to load trivial-dump-core using quicklisp.
@@ -160,7 +156,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    ; Loading "trivial-dump-core"
    [package trivial-dump-core]
    (TRIVIAL-DUMP-CORE)
-   * 
+   *
 #+END_SRC
 
    Let's define a new function.
@@ -168,9 +164,9 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
 #+BEGIN_SRC
    * (defun hello-world ()
        (format t "Hello, World!~%"))
-   
+
    HELLO-WORLD
-   * 
+   *
 #+END_SRC
 
    Finally, we create an executable with the name "sbcl-hello-world"
@@ -197,7 +193,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    it.
 
 #+BEGIN_SRC
-   rolando@rolando-desktop:~$ ./sbcl-hello-world 
+   rolando@rolando-desktop:~$ ./sbcl-hello-world
    Hello, World!
    rolando@rolando-desktop:~$
 #+END_SRC
@@ -219,11 +215,11 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    (Also notice the use of =lambda= in the following example do define
    the top-level function).
 
-#+BEGIN_SRC   
+#+BEGIN_SRC
    rolando@rolando-desktop:~$ sbcl
    This is SBCL 1.0.55, an implementation of ANSI Common Lisp.
    More information about SBCL is available at <http://www.sbcl.org/>.
-   
+
    SBCL is free software, provided as is, with absolutely no warranty.
    It is mostly in the public domain; some portions are provided under
    BSD-style licenses.  See the CREDITS and COPYING files in the
@@ -233,7 +229,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
      Load 1 ASDF system:
        trivial-dump-core
    ; Loading "trivial-dump-core"
-   
+
    (TRIVIAL-DUMP-CORE)
    * (trivial-dump-core:save-executable
         "sbcl-hello-world-repl"
@@ -253,12 +249,12 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    is currently unavailable in Clozure CL).
 
 #+BEGIN_SRC
-   rolando@rolando-desktop:~$ ./sbcl-hello-world-repl 
+   rolando@rolando-desktop:~$ ./sbcl-hello-world-repl
    Hello, World!
    * (+ 1 1)
-   
+
    2
-   * 
+   *
 #+END_SRC
 
 * SBCL and Slime
@@ -280,15 +276,15 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
 
    When the prompt opens, load trivial-dump-core as normal.
 
-#+BEGIN_SRC   
+#+BEGIN_SRC
    CL-USER> (ql:quickload 'trivial-dump-core)
    To load "trivial-dump-core":
      Load 1 ASDF system:
        trivial-dump-core
    ; Loading "trivial-dump-core"
-   
+
    (TRIVIAL-DUMP-CORE)
-   CL-USER> 
+   CL-USER>
 #+END_SRC
 
    Let's create a new image using =dump-image=.
@@ -296,9 +292,9 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
 #+BEGIN_SRC
    CL-USER> (trivial-dump-core:dump-image "sbcl-slime")
    Cannot dump an sbcl image from inside Slime.
-   
+
    Please go to the *inferior-lisp* buffer in emacs and run the following code:
-   
+
    (trivial-dump-core::sbcl-dump-image-slime "sbcl-slime")
    NIL
    CL-USER>
@@ -319,7 +315,7 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    writing 2224 bytes from the static space at 0x01100000
    writing 35590144 bytes from the dynamic space at 0x09000000
    done]
-   
+
    Process inferior-lisp finished
 #+END_SRC
 
@@ -335,13 +331,13 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
      Load 1 ASDF system:
        trivial-dump-core
    ; Loading "trivial-dump-core"
-   
+
    (TRIVIAL-DUMP-CORE)
    CL-USER> (trivial-dump-core:save-executable "sbcl-exec-slime" #'(lambda () (format t "Hello, World!")))
    Cannot run save an sbcl image from inside Slime.
-   
+
    Please go to the *inferior-lisp* buffer in emacs and run the following code:
-   
+
    (trivial-dump-core::sbcl-save-slime-and-die "sbcl-exec-slime" #'(LAMBDA ()
                                                                      (FORMAT
                                                                       T
@@ -365,6 +361,6 @@ Currently it supports three lisp implementations: SBCL, Clozure CL and CLISP.
    writing 2224 bytes from the static space at 0x01100000
    writing 35340288 bytes from the dynamic space at 0x09000000
    done]
-   
+
    Process inferior-lisp finished
 #+END_SRC
