@@ -53,7 +53,7 @@ Please consult its documentation to see how you can dump the lisp image."
                               (lisp-implementation-type))
   )
 
-(defmacro save-executable (filename init-function &key &allow-other-keys)
+(defmacro save-executable (filename init-function)
   "Make a stand-alone executable file from the current Lisp process.
 
 FILENAME: Path of the executable file
