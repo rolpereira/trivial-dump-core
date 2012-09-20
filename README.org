@@ -263,7 +263,7 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
    The end result is a core file similar to one created in the
    command-line.
 
-   The same think happens when you try to use =save-executable= with
+   The same thing happens when you try to use =save-executable= with
    SBCL in Slime.
 
 #+BEGIN_SRC
