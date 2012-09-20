@@ -198,65 +198,6 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
    rolando@rolando-desktop:~$
 #+END_SRC
 
-   So the program called our =hello-world= function, and after it
-   returned, the lisp process ended.
-
-   But what if we wanted to open a REPL after the return of top-level
-   function, so we could inspect the state of some variables?
-
-   In that case you need to set the key =exit-repl= to NIL.
-
-   By default, =exit-repl= is T. In that case we get the behaviour
-   shown before, ie. after the execution of the top-level function,
-   the lisp process closes and we return to the command-line. However,
-   if =exit-repl= is NIL, then after the execution of the top-level
-   function we return to the regular REPL.
-
-   (Also notice the use of =lambda= in the following example do define
-   the top-level function).
-
-#+BEGIN_SRC
-   rolando@rolando-desktop:~$ sbcl
-   This is SBCL 1.0.55, an implementation of ANSI Common Lisp.
-   More information about SBCL is available at <http://www.sbcl.org/>.
-
-   SBCL is free software, provided as is, with absolutely no warranty.
-   It is mostly in the public domain; some portions are provided under
-   BSD-style licenses.  See the CREDITS and COPYING files in the
-   distribution for more information.
-   * (ql:quickload 'trivial-dump-core)
-   To load "trivial-dump-core":
-     Load 1 ASDF system:
-       trivial-dump-core
-   ; Loading "trivial-dump-core"
-
-   (TRIVIAL-DUMP-CORE)
-   * (trivial-dump-core:save-executable
-        "sbcl-hello-world-repl"
-        #'(lambda ()
-            (format t "Hello, World!~%")) :exit-repl nil)
-   [undoing binding stack and other enclosing state... done]
-   [saving current Lisp image into sbcl-hello-world-repl:
-   writing 3512 bytes from the read-only space at 0x01000000
-   writing 2224 bytes from the static space at 0x01100000
-   writing 32231424 bytes from the dynamic space at 0x09000000
-   done]
-   rolando@rolando-desktop:~$
-#+END_SRC
-
-   Notice that when we run the file =sbcl-hello-world-repl= we get a
-   lisp prompt when the top-level function returns (this functionality
-   is currently unavailable in Clozure CL).
-
-#+BEGIN_SRC
-   rolando@rolando-desktop:~$ ./sbcl-hello-world-repl
-   Hello, World!
-   * (+ 1 1)
-
-   2
-   *
-#+END_SRC
-
 * SBCL and Slime
 
   There a problem with saving core images in SBCL when it's running
