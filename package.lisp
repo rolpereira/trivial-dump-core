@@ -26,5 +26,6 @@
 (defpackage #:trivial-dump-core
   (:use #:cl)
   (:export #:dump-image
-           #:save-executable))
+           #:save-executable
+           #:dump-image-init))
 
