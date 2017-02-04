@@ -50,7 +50,7 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
 
 ** dump-image-init
    
-   Almost the same as dump-image, but takes and init-function argument like save-executable.
+   Almost the same as dump-image, but takes and init-function argument, like save-executable.
 
 * Examples
 
