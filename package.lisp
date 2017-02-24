@@ -25,6 +25,8 @@
 
 (defpackage #:trivial-dump-core
   (:use #:cl)
+  (:nicknames "trivdumpcore" "tdumpc")
   (:export #:dump-image
-           #:save-executable))
+           #:save-executable
+           #:dump-image-init))
 

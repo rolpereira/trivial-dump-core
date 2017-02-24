@@ -16,9 +16,11 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
 
 * Library functions
 
-  There are two main functions in trivial-dump-core:
+  There are three main functions in trivial-dump-core:
 
   * dump-image
+  
+  * dump-image-init
 
   * save-executable
 
@@ -45,6 +47,10 @@ Currently trivial-dump-core supports SBCL, Clozure CL and CLISP.
 
    * =init-function= - Zero-argument function object that acts as the
      entry point to your executable (the equivalent of main() in C).
+
+** dump-image-init
+   
+   Almost the same as dump-image, but takes and init-function argument, like save-executable.
 
 * Examples
 

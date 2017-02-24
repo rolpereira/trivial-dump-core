@@ -53,6 +53,34 @@ Please consult its documentation to see how you can dump the lisp image."
                               (lisp-implementation-type))
   )
 
+(defun dump-image-init (filename init-function)
+  "Dump the current state of the Lisp process to an image file, with an init function."
+  #+clisp (progn
+            (format t "To run the image, use the following command in the terminal:
+clisp -M ~A~%"
+             filename)
+            (ext:saveinitmem filename :init-function (lambda ()
+                                    (funcall init-function)
+                                    (ext:exit))))
+  #+sbcl (cond ((is-slime-running)
+                 (print-dump-image-slime-help filename))
+           (t
+             (format t "To run the image, use the following command in the terminal:
+sbcl --core ~A~%"
+               filename)
+             (sb-ext:save-lisp-and-die filename :toplevel init-function)))
+  #+clozure (progn
+              (format t "To run the image, use the following command in the terminal:
+ccl -I ~A~%"
+             filename)
+              (ccl:save-application filename :toplevel-function init-function))
+  #-(or clisp sbcl clozure) (error "The lisp implementation \"~A\" isn't supported.
+
+Please consult its documentation to see how you can dump the lisp image."
+                              (lisp-implementation-type))
+  )
+
+
 (defmacro save-executable (filename init-function)
   "Make a stand-alone executable file from the current Lisp process.
 
